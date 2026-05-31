@@ -10,6 +10,62 @@ import { useToast } from '@/hooks/use-toast'
 
 const RATE = 1333333
 const RECEIVER_WALLET = process.env.NEXT_PUBLIC_OMU_WALLET_ADDRESS ?? ''
+const PRESALE_RAISED_SOL = 30
+const SOFT_CAP_SOL = 50
+const HARD_CAP_SOL = 150
+
+function CapProgress({
+  label,
+  current,
+  target,
+  delay,
+}: {
+  label: string
+  current: number
+  target: number
+  delay: number
+}) {
+  const progress = Math.min((current / target) * 100, 100)
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 12 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, delay }}
+      viewport={{ once: true }}
+      className="rounded-xl border-2 px-3 py-2.5 sm:px-4 sm:py-3"
+      style={{ borderColor: '#611F2B', backgroundColor: '#FEF7E3' }}
+    >
+      <div className="mb-2 flex items-center justify-between gap-3">
+        <p
+          className="text-sm font-black sm:text-base"
+          style={{
+            color: '#611F2B',
+            fontFamily: "'Uberhand Pro Extrabold', sans-serif",
+            fontWeight: 900,
+            fontStyle: 'normal',
+            WebkitTextStroke: '0.4px #611F2B',
+            textShadow: '-0.4px -0.4px 0 #611F2B, 0.4px -0.4px 0 #611F2B, -0.4px 0.4px 0 #611F2B, 0.4px 0.4px 0 #611F2B',
+          }}
+        >
+          {label}
+        </p>
+        <p className="shrink-0 text-sm font-black sm:text-base" style={{ color: '#611F2B' }}>
+          {current}/{target} SOL
+        </p>
+      </div>
+      <div className="h-3 overflow-hidden rounded-full border-2 border-[#611F2B] bg-[#f8e9c9]">
+        <motion.div
+          className="h-full rounded-full bg-[#611F2B]"
+          initial={{ width: 0 }}
+          whileInView={{ width: `${progress}%` }}
+          transition={{ duration: 0.7, delay: delay + 0.1, ease: 'easeOut' }}
+          viewport={{ once: true }}
+        />
+      </div>
+    </motion.div>
+  )
+}
 
 export default function PresaleSection() {
   const [solAmount, setSolAmount] = useState<number>(1)
@@ -156,7 +212,7 @@ export default function PresaleSection() {
           </motion.div>
 
           {/* Right Side - Presale Card */}
-          <div className="group relative order-1 mt-14 overflow-visible lg:order-2 lg:mt-0">
+          <div className="group relative order-1 mt-9 overflow-visible sm:mt-14 lg:order-2 lg:mt-0">
             <Image
               src="/right-peak.png"
               alt="Decorative peak"
@@ -170,7 +226,7 @@ export default function PresaleSection() {
               transition={{ duration: 0.6, type: 'spring', stiffness: 100 }}
               whileHover={{ boxShadow: '16px 16px 0px rgba(97, 31, 43, 0.3)', y: -5 }}
               viewport={{ once: true }}
-              className="relative z-10 rounded-3xl border-4 p-5 pt-10 sm:p-10"
+              className="relative z-10 rounded-3xl border-4 p-4 pt-8 sm:p-10"
               style={{
                 borderColor: '#611F2B',
                 backgroundColor: '#FEF7E3',
@@ -196,91 +252,14 @@ export default function PresaleSection() {
                     WebkitTextStroke: '0.8px #611F2B',
                     textShadow: '-0.8px -0.8px 0 #611F2B, 0.8px -0.8px 0 #611F2B, -0.8px 0.8px 0 #611F2B, 0.8px 0.8px 0 #611F2B',
                   }}
-                  className="mb-6 text-[2.25rem] sm:mb-8 sm:text-[2.6rem]"
+                  className="mb-4 text-[2rem] leading-none sm:mb-8 sm:text-[2.6rem]"
                 >
                   Buy $OMU
                 </h3>
 
-                {/* Soft Cap & Hard Cap - Top */}
-                <div className="grid grid-cols-2 gap-4 mb-8">
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5, delay: 0.1 }}
-                    whileHover={{ scale: 1.05, backgroundColor: '#FEF7E3' }}
-                    viewport={{ once: true }}
-                    className="p-4 border-2 rounded-xl text-center cursor-pointer"
-                    style={{
-                      borderColor: '#611F2B',
-                      backgroundColor: '#FEF7E3',
-                    }}
-                  >
-                    <p
-                      className="mb-2 text-sm font-black sm:text-base"
-                      style={{
-                        color: '#611F2B',
-                        fontFamily: "'Uberhand Pro Extrabold', sans-serif",
-                        fontWeight: 900,
-                        fontStyle: 'normal',
-                        WebkitTextStroke: '0.5px #611F2B',
-                        textShadow: '-0.5px -0.5px 0 #611F2B, 0.5px -0.5px 0 #611F2B, -0.5px 0.5px 0 #611F2B, 0.5px 0.5px 0 #611F2B',
-                      }}
-                    >
-                      Soft Cap
-                    </p>
-                    <p
-                      className="text-xl font-black sm:text-2xl"
-                      style={{
-                        color: '#611F2B',
-                        fontFamily: "'Uberhand Pro Extrabold', sans-serif",
-                        fontWeight: 900,
-                        fontStyle: 'normal',
-                        WebkitTextStroke: '0.5px #611F2B',
-                        textShadow: '-0.5px -0.5px 0 #611F2B, 0.5px -0.5px 0 #611F2B, -0.5px 0.5px 0 #611F2B, 0.5px 0.5px 0 #611F2B',
-                      }}
-                    >
-                      50 SOL
-                    </p>
-                  </motion.div>
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5, delay: 0.2 }}
-                    whileHover={{ scale: 1.05, backgroundColor: '#FEF7E3' }}
-                    viewport={{ once: true }}
-                    className="p-4 border-2 rounded-xl text-center cursor-pointer"
-                    style={{
-                      borderColor: '#611F2B',
-                      backgroundColor: '#FEF7E3',
-                    }}
-                  >
-                    <p
-                      className="mb-2 text-sm font-black sm:text-base"
-                      style={{
-                        color: '#611F2B',
-                        fontFamily: "'Uberhand Pro Extrabold', sans-serif",
-                        fontWeight: 900,
-                        fontStyle: 'normal',
-                        WebkitTextStroke: '0.5px #611F2B',
-                        textShadow: '-0.5px -0.5px 0 #611F2B, 0.5px -0.5px 0 #611F2B, -0.5px 0.5px 0 #611F2B, 0.5px 0.5px 0 #611F2B',
-                      }}
-                    >
-                      Hard Cap
-                    </p>
-                    <p
-                      className="text-xl font-black sm:text-2xl"
-                      style={{
-                        color: '#611F2B',
-                        fontFamily: "'Uberhand Pro Extrabold', sans-serif",
-                        fontWeight: 900,
-                        fontStyle: 'normal',
-                        WebkitTextStroke: '0.5px #611F2B',
-                        textShadow: '-0.5px -0.5px 0 #611F2B, 0.5px -0.5px 0 #611F2B, -0.5px 0.5px 0 #611F2B, 0.5px 0.5px 0 #611F2B',
-                      }}
-                    >
-                      150 SOL
-                    </p>
-                  </motion.div>
+                <div className="mb-5 grid gap-3 sm:mb-8">
+                  <CapProgress label="Soft Cap" current={PRESALE_RAISED_SOL} target={SOFT_CAP_SOL} delay={0.1} />
+                  <CapProgress label="Hard Cap" current={PRESALE_RAISED_SOL} target={HARD_CAP_SOL} delay={0.2} />
                 </div>
 
                 {/* SOL Input */}
@@ -289,10 +268,10 @@ export default function PresaleSection() {
                   whileInView={{ opacity: 1 }}
                   transition={{ duration: 0.5, delay: 0.3 }}
                   viewport={{ once: true }}
-                  className="mb-8"
+                  className="mb-5 sm:mb-8"
                 >
                   <label
-                    className="block text-sm font-bold mb-3"
+                    className="mb-2 block text-sm font-bold sm:mb-3"
                     style={{
                       color: '#611F2B',
                       fontFamily: "'Uberhand Pro Extrabold', sans-serif",
@@ -312,7 +291,7 @@ export default function PresaleSection() {
                     value={solAmount}
                     onChange={handleSolChange}
                     onFocus={handleSolFocus}
-                    className="w-full p-4 border-3 rounded-xl text-lg font-bold"
+                    className="w-full rounded-xl border-3 p-3 text-lg font-bold sm:p-4"
                     whileFocus={{
                       scale: 1.02,
                       boxShadow: '0px 0px 20px rgba(97, 31, 43, 0.2)',
@@ -343,10 +322,10 @@ export default function PresaleSection() {
                   whileInView={{ opacity: 1 }}
                   transition={{ duration: 0.5, delay: 0.4 }}
                   viewport={{ once: true }}
-                  className="mb-10"
+                  className="mb-7 sm:mb-10"
                 >
                   <label
-                    className="block text-sm font-bold mb-3"
+                    className="mb-2 block text-sm font-bold sm:mb-3"
                     style={{
                       color: '#611F2B',
                       fontFamily: "'Uberhand Pro Extrabold', sans-serif",
@@ -359,7 +338,7 @@ export default function PresaleSection() {
                     You will receive
                   </label>
                   <motion.div
-                    className="w-full p-5 border-3 rounded-xl text-xl font-black"
+                    className="w-full rounded-xl border-3 p-3 text-lg font-black sm:p-5 sm:text-xl"
                     animate={{
                       scale: solAmount > 0 ? 1 : 1,
                     }}
@@ -384,7 +363,7 @@ export default function PresaleSection() {
                   }}
                   whileTap={{ scale: 0.88 }}
                   transition={{ type: 'spring', stiffness: 400, damping: 20 }}
-                  className="relative w-full py-4 pt-6 border-4 font-black rounded-2xl text-xl cursor-pointer overflow-visible"
+                  className="relative w-full cursor-pointer overflow-visible rounded-2xl border-4 py-3 pt-5 text-xl font-black sm:py-4 sm:pt-6"
                   style={{
                     borderColor: '#611F2B',
                     backgroundColor: '#611F2B',
