@@ -1,0 +1,23 @@
+{
+  "name": "$OMU Presale",
+  "short_name": "$OMU",
+  "description": "Join the $OMU presale on Solana.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FEF7E3",
+  "theme_color": "#611F2B",
+  "icons": [
+    {
+      "src": "/logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
