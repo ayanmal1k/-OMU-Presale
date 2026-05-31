@@ -13,6 +13,8 @@ const RECEIVER_WALLET = process.env.NEXT_PUBLIC_OMU_WALLET_ADDRESS ?? ''
 const PRESALE_RAISED_SOL = 30
 const SOFT_CAP_SOL = 50
 const HARD_CAP_SOL = 150
+const MIN_SOL_AMOUNT = 0.1
+const MAX_SOL_AMOUNT = 5
 
 function CapProgress({
   label,
@@ -68,29 +70,35 @@ function CapProgress({
 }
 
 export default function PresaleSection() {
-  const [solAmount, setSolAmount] = useState<number>(1)
+  const [solAmount, setSolAmount] = useState('0.1')
   const [showWalletAddress, setShowWalletAddress] = useState(false)
-  const [buyAmount, setBuyAmount] = useState<number>(1)
+  const [buyAmount, setBuyAmount] = useState<number>(MIN_SOL_AMOUNT)
   const [showVerifyModal, setShowVerifyModal] = useState(false)
   const [verifyStatus, setVerifyStatus] = useState<'verifying' | 'success'>('verifying')
   const walletSectionRef = useRef<HTMLDivElement>(null)
   const verifyTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const omuAmount = solAmount * RATE
+  const parsedSolAmount = Number.parseFloat(solAmount)
+  const hasSolValue = solAmount.trim().length > 0
+  const isSolNumber = Number.isFinite(parsedSolAmount)
+  const isSolAmountValid = isSolNumber && parsedSolAmount >= MIN_SOL_AMOUNT && parsedSolAmount <= MAX_SOL_AMOUNT
+  const solError =
+    hasSolValue && !isSolAmountValid
+      ? `Enter an amount between ${MIN_SOL_AMOUNT} and ${MAX_SOL_AMOUNT} SOL.`
+      : ''
+  const omuAmount = isSolNumber ? parsedSolAmount * RATE : 0
   const purchasedOmuAmount = buyAmount * RATE
   const { toast } = useToast()
 
   const handleSolChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = parseFloat(e.target.value) || 0
-    if (value >= 1 && value <= 5) {
+    const value = e.target.value
+
+    if (/^\d*\.?\d*$/.test(value)) {
       setSolAmount(value)
     }
   }
 
   const handleSolFocus = (e: React.FocusEvent<HTMLInputElement>) => {
-    if (solAmount === 0) {
-      setSolAmount(0)
-      e.target.select()
-    }
+    e.target.select()
   }
 
   const handleCopyWallet = async () => {
@@ -117,7 +125,11 @@ export default function PresaleSection() {
   }
 
   const handleBuyClick = () => {
-    setBuyAmount(solAmount)
+    if (!isSolAmountValid) {
+      return
+    }
+
+    setBuyAmount(parsedSolAmount)
     setShowWalletAddress(true)
     toast({
       title: 'Wallet Address',
@@ -284,12 +296,13 @@ export default function PresaleSection() {
                     Amount in SOL
                   </label>
                   <motion.input
-                    type="number"
-                    min="1"
-                    max="5"
+                    type="text"
+                    inputMode="decimal"
                     step="0.1"
                     value={solAmount}
                     onChange={handleSolChange}
+                    aria-invalid={Boolean(solError)}
+                    aria-describedby={solError ? 'sol-amount-error' : undefined}
                     onFocus={handleSolFocus}
                     className="w-full rounded-xl border-3 p-3 text-lg font-bold sm:p-4"
                     whileFocus={{
@@ -309,12 +322,25 @@ export default function PresaleSection() {
                   />
                   <div className="flex justify-between mt-2">
                     <p className="text-sm font-bold sm:text-base" style={{ color: '#611F2B' }}>
-                      Min: 1 SOL
+                      Min: 0.1 SOL
                     </p>
                     <p className="text-sm font-bold sm:text-base" style={{ color: '#611F2B' }}>
                       Max: 5 SOL
                     </p>
                   </div>
+                  {solError && (
+                    <p
+                      id="sol-amount-error"
+                      className="mt-2 text-sm font-black"
+                      style={{
+                        color: '#b91c1c',
+                        fontFamily: "'Uberhand Pro Extrabold', sans-serif",
+                        fontWeight: 900,
+                      }}
+                    >
+                      {solError}
+                    </p>
+                  )}
                 </motion.div>
 
                 <motion.div
@@ -356,19 +382,21 @@ export default function PresaleSection() {
                 <motion.button
                   type="button"
                   onClick={handleBuyClick}
+                  disabled={!isSolAmountValid}
                   whileHover={{
-                    scale: 1.12,
-                    boxShadow: '12px 12px 0px rgba(97, 31, 43, 0.5)',
-                    backgroundColor: '#7a1a2e',
+                    scale: isSolAmountValid ? 1.12 : 1,
+                    boxShadow: isSolAmountValid ? '12px 12px 0px rgba(97, 31, 43, 0.5)' : '6px 6px 0px rgba(97, 31, 43, 0.3)',
+                    backgroundColor: isSolAmountValid ? '#7a1a2e' : '#8f6b72',
                   }}
-                  whileTap={{ scale: 0.88 }}
+                  whileTap={{ scale: isSolAmountValid ? 0.88 : 1 }}
                   transition={{ type: 'spring', stiffness: 400, damping: 20 }}
-                  className="relative w-full cursor-pointer overflow-visible rounded-2xl border-4 py-3 pt-5 text-xl font-black sm:py-4 sm:pt-6"
+                  className="relative w-full cursor-pointer overflow-visible rounded-2xl border-4 py-3 pt-5 text-xl font-black disabled:cursor-not-allowed sm:py-4 sm:pt-6"
                   style={{
                     borderColor: '#611F2B',
-                    backgroundColor: '#611F2B',
+                    backgroundColor: isSolAmountValid ? '#611F2B' : '#8f6b72',
                     color: '#FEF7E3',
                     boxShadow: '6px 6px 0px rgba(97, 31, 43, 0.3)',
+                    opacity: isSolAmountValid ? 1 : 0.78,
                   }}
                 >
                   <Image
